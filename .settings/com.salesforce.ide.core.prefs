@@ -1,0 +1,13 @@
+#Tue Oct 22 12:44:37 PDT 2013
+eclipse.preferences.version=1
+endpointApiVersion=26.0
+endpointEnvironment=Production/Developer Edition
+endpointServer=www.salesforce.com
+httpsProtocol=true
+ideVersion=26.0
+keependpoint=false
+metadataFormatVersion=26.0
+namespacePrefix=
+packageName=Adzerk
+readTimeout=400
+username=ashish.tomar@77demo.com
