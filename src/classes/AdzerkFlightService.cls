@@ -1,13 +1,13 @@
 public class AdzerkFlightService {
 
-	public class AdzerkGeoTargetingService {
+	public class GeoTargeting {
 		public String CountryCode;
 		public String Region;
 		public Integer MetroCode;
 		public Boolean IsExclude;
 	}
 
-	public class AdzerkSiteZoneTargetingService {
+	public class SiteZoneTargeting {
 		public Integer SiteId;
 		public Integer ZoneId;
 		public Boolean IsExclude;
