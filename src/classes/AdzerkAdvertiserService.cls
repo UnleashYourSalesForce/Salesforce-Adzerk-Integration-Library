@@ -5,8 +5,28 @@ public class AdzerkAdvertiserService {
     public Boolean IsActive;
 
     public AdzerkAdvertiserService(JSONParser parser) {
+    while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'Title'){
+                                            Title=parser.getText();
+                                            } else if (text == 'IsDeleted') {
+                                             IsDeleted=Boolean.Valueof(parser.getText());
+                                             } else if (text == 'IsActive') {
+                                                IsActive=Boolean.Valueof(parser.getText());
+                                                }
+                                         }
+                                   }
+                            }
     }
-    
+    public AdzerkAdvertiserService (String accessToken, String id, Map<String, String> params) {
+                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
+        }
+        
+        public AdzerkAdvertiserService (String accessToken, String id) {
+                this(accessToken, id, null);
+        }
     public static AdzerkAdvertiserService parse(String json) {
         return new AdzerkAdvertiserService (System.JSON.createParser(json));
     }

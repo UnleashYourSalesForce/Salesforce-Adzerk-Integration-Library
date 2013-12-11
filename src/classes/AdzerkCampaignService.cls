@@ -12,8 +12,34 @@ public class AdzerkCampaignService {
         public Boolean NoEndDate;
         
          public Flights (JSONParser parser) {
+         while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'EndDate'){
+                                            EndDate=parser.getText();
+                                            } else if (text == 'ChannelId') {
+                                             ChannelId=Integer.Valueof(parser.getText());
+                                             } else if (text == 'Keywords') {
+                                                Keywords=parser.getText();
+                                             } else if (text == 'Name') {
+                                                Name=parser.getText();
+                                             }else if (text == 'IsDeleted') {
+                                                IsDeleted=Boolean.Valueof(parser.getText());
+                                             }else if (text == 'StartDate') {
+                                                StartDate=parser.getText();
+                                             }else if (text == 'Price') {
+                                                Price=parser.getText();
+                                             }else if (text == 'Impressions') {
+                                                Impressions=Integer.Valueof(parser.getText());
+                                             }else if (text == 'NoEndDate') {
+                                                NoEndDate=Boolean.Valueof(parser.getText());
+                                             }
+                                         }
+                                   }
+                            }
    
-    }        
+         }        
  
     }
 
@@ -32,10 +58,42 @@ public class AdzerkCampaignService {
     /* Constructor */
     
     public AdzerkCampaignService(JSONParser parser) {
-   
+    while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'EndDate'){
+                                            EndDate=parser.getText();
+                                            } else if (text == 'AdvertiserId') {
+                                             AdvertiserId=Integer.Valueof(parser.getText());
+                                             } else if (text == 'Name') {
+                                                Name=parser.getText();
+                                             }else if (text == 'Flights') {
+                                                Flights= new List<Flights>();
+                                               while (parser.nextToken() != JSONToken.END_ARRAY) {
+                                              Flights.add(new Flights(parser));
+                                               }
+                                             }else if (text == 'IsDeleted') {
+                                                IsDeleted=Boolean.valueof(parser.getText());
+                                             }else if (text == 'StartDate') {
+                                                StartDate=parser.getText();
+                                             }else if (text == 'Price') {
+                                                Price=parser.getText();
+                                             }else if (text == 'IsActive') {
+                                                IsActive=Boolean.valueof(parser.getText());
+                                             }
+                                         }
+                                   }
+                            }
     }
 
-    
+     public AdzerkCampaignService (String accessToken, String id, Map<String, String> params) {
+                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
+        }
+        
+        public AdzerkCampaignService (String accessToken, String id) {
+                this(accessToken, id, null);
+        }
     public static AdzerkCampaignService parse(String json) {
         return new AdzerkCampaignService (System.JSON.createParser(json));
     }
