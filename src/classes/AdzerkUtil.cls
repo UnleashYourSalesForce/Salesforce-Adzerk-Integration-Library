@@ -114,8 +114,8 @@ public class AdzerkUtil {
      * This methods makes a POST 
      * 
      */
-    public static void post(String accessToken, String resource, Map<String, String> params) {
-    
+    public static string CreateRecord(String accessToken, String resource, Map<String, String> params) {
+       String response;
         Http h = new Http();
         HttpRequest req = new HttpRequest();
         req.setMethod('POST');
@@ -131,6 +131,7 @@ public class AdzerkUtil {
                 res = new HttpResponse();
         } else {
                 res = h.send(req);
+                response=res.getbody();
         }
         
         if(res.getStatusCode() != 200) {
@@ -139,14 +140,47 @@ public class AdzerkUtil {
             System.debug('Body: ' + req.getBody());
            
         }
+        return response;
     }
-
-    public static void deleteItem(String accessToken, String resource) {
-            String response;
-            
+  
+  /**
+     * This methods makes a put
+     * 
+     */
+    public static string UpdateRecord(String accessToken, String resource, Map<String, String> params) {
+       String response;
         Http h = new Http();
         HttpRequest req = new HttpRequest();
-        req.setMethod('DELETE');
+        req.setMethod('PUT');
+        req.setHeader('X-Adzerk-ApiKey',accessToken);
+         if (params != null) {
+            req.setBody(postBodyStringFromMap(params));
+            } 
+   
+        req.setEndpoint(Apiendpoint+resource);
+        
+        HttpResponse res;
+        if(testmode) {
+                res = new HttpResponse();
+        } else {
+                res = h.send(req);
+                response=res.getbody();
+        }
+        
+        if(res.getStatusCode() != 200) {
+            System.debug('Error POSTing to Graph: '+res);
+            System.debug('Request: '+req);
+            System.debug('Body: ' + req.getBody());
+           
+        }
+        return response;
+    }
+    public static void deleteItem(String accessToken, String resource) {
+        String response;            
+        Http h = new Http();
+        HttpRequest req = new HttpRequest();
+        //req.setMethod('DELETE');
+        req.setHeader('X-Adzerk-ApiKey',accessToken);
         req.setEndpoint(Apiendpoint);
         req.setTimeout(60*1000);
 

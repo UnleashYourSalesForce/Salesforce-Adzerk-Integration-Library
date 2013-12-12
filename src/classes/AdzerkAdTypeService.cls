@@ -57,9 +57,23 @@ public class AdzerkAdTypeService {
                                    }
                             }
     }
-    
+    //Get AdType Data from Adzerk
+    public AdzerkAdTypeService (String accessToken, String id, Map<String, String> params) {
+                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
+    }        
+    public AdzerkAdTypeService (String accessToken, String id) {
+                this(accessToken, id, null);
+    }
+    //Create AdType on Adzerk    
+    public AdzerkAdTypeService CreateAdType (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkAdTypeService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+    }
+    //Update AdType on Adzerk
+    public AdzerkAdTypeService UpdateAdType(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkAdTypeService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+    }
     public static AdzerkAdTypeService parse(String json) {
-        return new AdzerkAdTypeService (System.JSON.createParser(json));
+              return new AdzerkAdTypeService (System.JSON.createParser(json));
     }
     
     static testMethod void testParse() {

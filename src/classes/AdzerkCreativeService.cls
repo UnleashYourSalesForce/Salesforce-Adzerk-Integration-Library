@@ -39,16 +39,24 @@ public with sharing class AdzerkCreativeService {
                             }
    
          }    
+     //Get Creative Data from Adzerk 
      public AdzerkCreativeService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkCreativeService (String accessToken, String id) {
+     }        
+     public AdzerkCreativeService (String accessToken, String id) {
                 this(accessToken, id, null);
-        }
-    public static AdzerkCreativeService parse(String json) {
-        return new AdzerkCreativeService(System.JSON.createParser(json));
-    }
+     }
+     //Create Creative on Adzerk    
+     public AdzerkCreativeService CreateCreative (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkCreativeService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+     }
+     //Update Creative on Adzerk    
+     public AdzerkCreativeService UpdateCreative(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkCreativeService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+     }
+     public static AdzerkCreativeService parse(String json) {
+                return new AdzerkCreativeService(System.JSON.createParser(json));
+     }
     
     static testMethod void testParse() {
         String json = '{'+

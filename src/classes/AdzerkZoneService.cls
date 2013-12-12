@@ -21,15 +21,23 @@ public class AdzerkZoneService  {
                                    }
                             }
     }
+    //Get Zone Data from Adzerk
     public AdzerkZoneService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkZoneService (String accessToken, String id) {
+    }
+    public AdzerkZoneService (String accessToken, String id) {
                 this(accessToken, id, null);
-        }
+    }
+    //Create Zone on Adzerk    
+     public AdzerkZoneService CreateSite (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkZoneService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+     }
+     //Update Zone on Adzerk    
+     public AdzerkZoneService UpdateSite(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkZoneService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+     } 
     public static AdzerkZoneService parse(String json) {
-        return new AdzerkZoneService (System.JSON.createParser(json));
+               return new AdzerkZoneService (System.JSON.createParser(json));
     }
     
     static testMethod void testParse() {

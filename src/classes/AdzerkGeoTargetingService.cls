@@ -28,15 +28,23 @@ public with sharing class AdzerkGeoTargetingService {
                                    }
                             }
     }
+    //Get GeoTargeting Data from Adzerk
     public AdzerkGeoTargetingService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkGeoTargetingService (String accessToken, String id) {
+    }       
+    public AdzerkGeoTargetingService (String accessToken, String id) {
                 this(accessToken, id, null);
-        }
+    }
+     //Create Flight on Adzerk    
+    public AdzerkGeoTargetingService CreateGeoTargeting (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkGeoTargetingService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+    }
+     //Update Flight on Adzerk    
+     public AdzerkGeoTargetingService UpdateGeoTargeting(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkGeoTargetingService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+    }
     public static AdzerkGeoTargetingService parse(String json) {
-        return new AdzerkGeoTargetingService(System.JSON.createParser(json));
+               return new AdzerkGeoTargetingService(System.JSON.createParser(json));
     }
     
     static testMethod void testParse() {

@@ -22,16 +22,23 @@ public class AdzerkLoginService {
                                  }
                        }
     }
-      public AdzerkLoginService (String accessToken, String id, Map<String, String> params) {
+    //Get Login Data from Adzerk
+    public AdzerkLoginService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkLoginService(String accessToken, String id) {
+    }        
+    public AdzerkLoginService(String accessToken, String id) {
                 this(accessToken, id, null);
-        }
-    
+    }  
+    //Create Login on Adzerk    
+    public AdzerkLoginService CreateLogin (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkLoginService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+    }
+     //Update Login on Adzerk    
+     public AdzerkLoginService UpdateLogin(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkLoginService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+    }  
     public static AdzerkLoginService parse(String json) {
-        return new AdzerkLoginService (System.JSON.createParser(json));
+                return new AdzerkLoginService (System.JSON.createParser(json));
     }
     
     

@@ -115,8 +115,8 @@ public class AdzerkFlightService {
                                                 IsActive=boolean.valueof(parser.getText());
                                                 }else if (text == 'GeoTargeting') {
                                                 GeoTargeting= new List<GeoTargeting>();
-                                               while (parser.nextToken() != JSONToken.END_ARRAY) {
-                                              GeoTargeting.add(new GeoTargeting(parser));
+                                                while (parser.nextToken() != JSONToken.END_ARRAY) {
+                                                GeoTargeting.add(new GeoTargeting(parser));
                                                }
                                              }else if (text == 'SiteZoneTargeting') {
                                                 SiteZoneTargeting= new List<SiteZoneTargeting>();
@@ -140,16 +140,24 @@ public class AdzerkFlightService {
                                  }
                        }
     }
+     //Get Flight Data from Adzerk
      public AdzerkFlightService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkFlightService (String accessToken, String id) {
+     }
+     public AdzerkFlightService (String accessToken, String id) {
                 this(accessToken, id, null);
-        }
-    public static AdzerkFlightService parse(String json) {
-        return new AdzerkFlightService (System.JSON.createParser(json));
-    }
+     }
+     //Create Flight on Adzerk    
+     public AdzerkFlightService CreateFlight (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkFlightService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+     }
+     //Update Flight on Adzerk    
+     public AdzerkFlightService UpdateFlight(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkFlightService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+     }
+     public static AdzerkFlightService parse(String json) {
+                return new AdzerkFlightService (System.JSON.createParser(json));
+     }
 
 
     

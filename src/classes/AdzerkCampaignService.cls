@@ -1,4 +1,4 @@
-public class AdzerkCampaignService {
+global class AdzerkCampaignService {
 
     public class Flights {
         public String EndDate;
@@ -86,17 +86,24 @@ public class AdzerkCampaignService {
                                    }
                             }
     }
-
+     //Get Campaign Data from Adzerk 
      public AdzerkCampaignService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkCampaignService (String accessToken, String id) {
+        }  
+     public AdzerkCampaignService (String accessToken, String id) {
                 this(accessToken, id, null);
         }
-    public static AdzerkCampaignService parse(String json) {
-        return new AdzerkCampaignService (System.JSON.createParser(json));
-    }
+     //Create Campaign on Adzerk    
+     public AdzerkCampaignService CreateCampaign (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkCampaignService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+        }
+     //Update Campaign on Adzerk    
+     public AdzerkCampaignService UpdateCampaign(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkCampaignService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+        }
+     public static AdzerkCampaignService parse(String json) {
+               return new AdzerkCampaignService (System.JSON.createParser(json));
+        }
     
     /**
     //Starting apex v29 Test methods must be in test classes

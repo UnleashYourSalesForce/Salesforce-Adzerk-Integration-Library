@@ -24,16 +24,24 @@ public class AdzerkSiteService  {
                                    }
                             }
     }
+     //Get Login Data from Adzerk
      public AdzerkSiteService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }
-        
-        public AdzerkSiteService (String accessToken, String id) {
+     }        
+     public AdzerkSiteService (String accessToken, String id) {
                 this(accessToken, id, null);
-        }
-    public static AdzerkSiteService parse(String json) {
-        return new AdzerkSiteService (System.JSON.createParser(json));
-    }
+     }
+      //Create Login on Adzerk    
+     public AdzerkSiteService CreateSite (String accessToken, String id, Map<String, String> params) {
+                return new AdzerkSiteService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+     }
+     //Update Login on Adzerk    
+     public AdzerkSiteService UpdateSite(String accessToken, String id, Map<String, String> params) {
+                return new AdzerkSiteService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+     } 
+     public static AdzerkSiteService parse(String json) {
+                return new AdzerkSiteService (System.JSON.createParser(json));
+     }
     
     static testMethod void testParse() {
         String json = '{'+
