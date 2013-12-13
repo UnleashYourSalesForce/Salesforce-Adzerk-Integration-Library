@@ -1,10 +1,10 @@
 public class AdzerkAdvertiserService {
-
+    public class Items {
     public String Title;
     public Boolean IsDeleted;
     public Boolean IsActive;
-
-    public AdzerkAdvertiserService(JSONParser parser) {
+   
+    public Items (JSONParser parser) {
     while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
                                 String text = parser.getText();
@@ -20,6 +20,29 @@ public class AdzerkAdvertiserService {
                                    }
                             }
     }
+    }
+    
+    public Integer TotalPages;
+    public List<Items> Items;
+    
+    public AdzerkAdvertiserService (JSONParser parser) {
+    while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'TotalPages'){
+                                            TotalPages=Integer.Valueof(parser.getText());
+                                            }else if (text == 'Items ') {
+                                                Items = new List<Items >();
+                                               while (parser.nextToken() != JSONToken.END_ARRAY) {
+                                              Items .add(new Items(parser));
+                                               }
+                                            }
+                                         }
+                                   }
+                            }
+    }    
+    
      //Get Advertiser Data from Adzerk 
     public AdzerkAdvertiserService (String accessToken, String id, Map<String, String> params) {
                 this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
@@ -28,12 +51,12 @@ public class AdzerkAdvertiserService {
                 this(accessToken, id, null);
     }
     //Create Advertiser on Adzerk 
-    public AdzerkAdvertiserService CreateAdvertiser (String accessToken, String id, Map<String, String> params) {
-               return new AdzerkAdvertiserService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
+    public AdzerkAdvertiserService.Items  CreateAdvertiser (String accessToken, String id, Map<String, String> params) {
+               return new AdzerkAdvertiserService.Items  (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
     }
      //Update Advertiser on Adzerk
-    public AdzerkAdvertiserService UpdateAdvertiser(String accessToken, String id, Map<String, String> params) {
-               return new AdzerkAdvertiserService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+    public AdzerkAdvertiserService.Items  UpdateAdvertiser(String accessToken, String id, Map<String, String> params) {
+               return new AdzerkAdvertiserService.Items  (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
     }
     public static AdzerkAdvertiserService parse(String json) {
               return new AdzerkAdvertiserService (System.JSON.createParser(json));

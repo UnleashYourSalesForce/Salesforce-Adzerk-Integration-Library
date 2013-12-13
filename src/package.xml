@@ -9,6 +9,7 @@
         <members>AdzerkFlightService</members>
         <members>AdzerkGeoTargetingService</members>
         <members>AdzerkLoginService</members>
+        <members>AdzerkPriorityService</members>
         <members>AdzerkSiteService</members>
         <members>AdzerkUtil</members>
         <members>AdzerkZoneService</members>
