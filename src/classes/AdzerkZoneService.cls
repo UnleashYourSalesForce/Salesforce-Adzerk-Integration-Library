@@ -91,8 +91,8 @@ global with sharing class AdzerkZoneService  {
                 return new AdzerkZoneService.Items  (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
      }
      //Update Zone on Adzerk    
-     public AdzerkZoneService.Items  UpdateSite(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkZoneService.Items  (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
+     public AdzerkZoneService.Items  UpdateSite(String accessToken, String id, AdzerkZoneService.Items zone ) {
+                return new AdzerkZoneService.Items  (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, zone)));
      } 
     public static AdzerkZoneService parse(String json) {
                return new AdzerkZoneService (System.JSON.createParser(json));
