@@ -126,6 +126,7 @@ global with sharing class AdzerkZoneService  {
       
      
      //Update Zone on Adzerk    
+
      public AdzerkZoneService.Items  UpdateZone(String accessApikey,Integer id,AdzerkZoneService.Items zone) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/zone';
                 string jsonContent= Json.Serialize(zone);  
@@ -141,6 +142,7 @@ global with sharing class AdzerkZoneService  {
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkZoneService.Items(System.JSON.createParser(res.getbody()));
+
      } 
     
     /*static testMethod void testParse() {
@@ -151,5 +153,8 @@ global with sharing class AdzerkZoneService  {
         '}';
         AdzerkZoneService obj = parse(json);
         System.assert(obj != null);
+
     }*/
 }
+
+   
