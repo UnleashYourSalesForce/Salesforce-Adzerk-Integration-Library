@@ -31,7 +31,7 @@ global with sharing class AdzerkFlightService {
         public String Region;
         public Integer MetroCode;
         public Boolean IsExclude;
-        
+         public GeoTargeting(){}
     public GeoTargeting(JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -56,7 +56,7 @@ global with sharing class AdzerkFlightService {
         public Integer SiteId;
         public Integer ZoneId;
         public Boolean IsExclude;
-        
+        public SiteZoneTargeting (){}
     public SiteZoneTargeting (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -75,7 +75,7 @@ global with sharing class AdzerkFlightService {
                   }
         
     }
-
+    public class Items {
     public String StartDate;
     public String EndDate;
     public Boolean NoEndDate;
@@ -100,9 +100,11 @@ global with sharing class AdzerkFlightService {
     public Double CeilingECPM;
     public Double DefaultECPM;
     public Integer ECPMBurnInImpressions;
+    public Boolean IsECPMOptimized;
+    public Integer Id;
 
-    
-    public AdzerkFlightService(JSONParser parser) {
+     public Items (){}
+    public Items (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
                                 String text = parser.getText();
@@ -161,33 +163,103 @@ global with sharing class AdzerkFlightService {
                                                 DefaultECPM=Double.valueof(parser.getText());
                                                 }else if (text == 'ECPMBurnInImpressions') {
                                                 ECPMBurnInImpressions=Integer.valueof(parser.getText());
+                                                }else if (text == 'IsECPMOptimized') {
+                                                IsECPMOptimized=boolean.valueof(parser.getText());
+                                                }else if (text == 'Id') {
+                                                Id=Integer.valueof(parser.getText());
                                                 }
                                          }
                                  }
                        }
     }
-     //Get Flight Data from Adzerk
-     public AdzerkFlightService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
+   } 
+   
+    public Integer TotalPages;
+    public List<Items> Items;
+    public AdzerkFlightService (){} 
+    public AdzerkFlightService (JSONParser parser) {
+    while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'TotalPages'){
+                                            TotalPages=Integer.Valueof(parser.getText());
+                                            } else if (text == 'Items') {
+                                                Items= new List<Items>();
+                                               while (parser.nextToken() != JSONToken.END_ARRAY) {
+                                              Items.add(new Items(parser));
+                                               }
+                                             }
+                                         }
+                                   }
+                            }
+    }
+     //Get Flight Data List from Adzerk          
+     public AdzerkFlightService GetFlight (String accessApikey) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/flight'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkFlightService(System.JSON.createParser(res.getbody()));
      }
-     public AdzerkFlightService (String accessToken, String id) {
-                this(accessToken, id, null);
+     //Get Flight based on id from Adzerk          
+     public AdzerkFlightService.Items GetFlight (String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/flight';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint+'/'+id);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkFlightService.Items(System.JSON.createParser(res.getbody()));
      }
-     //Create Flight on Adzerk    
-     public AdzerkFlightService CreateFlight (String accessToken, String id, Map<String, String> params) {
-                return new AdzerkFlightService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-     }
+       
+      //Create Flight on Adzerk    
+      public AdzerkFlightService.Items CreateFlight  (String accessApikey,AdzerkFlightService.Items flight) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/flight';
+                string jsonContent= Json.Serialize(flight); 
+                system.debug('==========jsonContent'+jsonContent);               
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('flight='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkFlightService.Items(System.JSON.createParser(res.getbody()));
+      }
+    
+     
      //Update Flight on Adzerk    
-     public AdzerkFlightService UpdateFlight(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkFlightService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-     }
-     public static AdzerkFlightService parse(String json) {
-                return new AdzerkFlightService (System.JSON.createParser(json));
-     }
-
+     public AdzerkFlightService.Items  UpdateFlight  (String accessApikey,Integer id,AdzerkFlightService.Items flight) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/flight';
+                string jsonContent= Json.Serialize(flight);  
+                system.debug('===========jsonContent1'+jsonContent);              
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('PUT');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('flight='+jsonContent);
+                system.debug('===========jsonContent'+jsonContent);
+                req.setEndpoint(Apiendpoint+'/'+id);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkFlightService.Items(System.JSON.createParser(res.getbody()));
+     } 
+    
 
     
-    static testMethod void testParse() {
+   /* static testMethod void testParse() {
         String json = '{'+
         '  \"StartDate\":\"1/1/2011\",'+
         '  \"EndDate\":\"12/31/2011\",'+
@@ -225,5 +297,5 @@ global with sharing class AdzerkFlightService {
         '}';
         AdzerkFlightService obj = parse(json);
         System.assert(obj != null);
-    }
+    }*/
 }

@@ -26,6 +26,7 @@
 
 global with sharing class AdzerkCreativeService {
 
+   public class Items {
     public Integer AdvertiserId;
     public String Body;
     public String Url;
@@ -35,8 +36,12 @@ global with sharing class AdzerkCreativeService {
     public Integer AdTypeId;
     public String Alt;
     public Boolean IsActive;
-    
-     public AdzerkCreativeService (JSONParser parser) {
+    public String ScriptBody;
+    public Boolean IsHTMLJS;
+    public String ImageName;
+    public Integer Id;
+     public Items (){}
+     public Items (JSONParser parser) {
          while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
                                 String text = parser.getText();
@@ -59,32 +64,107 @@ global with sharing class AdzerkCreativeService {
                                                 Alt=parser.getText();
                                              }else if (text == 'IsActive') {
                                                 IsActive=Boolean.Valueof(parser.getText());
+                                             }else if (text == 'ScriptBody') {
+                                                ScriptBody=parser.getText();
+                                             }else if (text == 'IsHTMLJS') {
+                                                IsHTMLJS=Boolean.Valueof(parser.getText());
+                                             }else if (text == 'ImageName') {
+                                                ImageName=parser.getText();
+                                             }else if (text == 'Id') {
+                                                Id=Integer.Valueof(parser.getText());
                                              }
                                          }
                                    }
                             }
    
-         }    
-     //Get Creative Data from Adzerk 
-     public AdzerkCreativeService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-     }        
-     public AdzerkCreativeService (String accessToken, String id) {
-                this(accessToken, id, null);
-     }
-     //Create Creative on Adzerk    
-     public AdzerkCreativeService CreateCreative (String accessToken, String id, Map<String, String> params) {
-                return new AdzerkCreativeService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-     }
-     //Update Creative on Adzerk    
-     public AdzerkCreativeService UpdateCreative(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkCreativeService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-     }
-     public static AdzerkCreativeService parse(String json) {
-                return new AdzerkCreativeService(System.JSON.createParser(json));
-     }
+         }
+      } 
+      
+    public Integer TotalPages;
+    public List<Items> Items;
+    public AdzerkCreativeService (){} 
+    public AdzerkCreativeService (JSONParser parser) {
+    while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'TotalPages'){
+                                            TotalPages=Integer.Valueof(parser.getText());
+                                            } else if (text == 'Items') {
+                                                Items= new List<Items>();
+                                               while (parser.nextToken() != JSONToken.END_ARRAY) {
+                                              Items.add(new Items(parser));
+                                               }
+                                             }
+                                         }
+                                   }
+                            }
+    }
     
-    static testMethod void testParse() {
+    //Get Creative Data List from Adzerk          
+     public AdzerkCreativeService GetCreativeListByAdvertiserId  (String accessApikey,Integer AdvertiserId) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/advertiser/'+AdvertiserId+'/creatives'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkCreativeService (System.JSON.createParser(res.getbody()));
+     }
+     //Get Creative based on id from Adzerk          
+     public AdzerkCreativeService.Items GetCreative  (String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/creative';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint+'/'+id);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkCreativeService.Items(System.JSON.createParser(res.getbody()));
+     }
+       
+      //Create Creative on Adzerk    
+      public AdzerkCreativeService.Items CreateCreative  (String accessApikey,AdzerkCreativeService.Items creative) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/creative';
+                string jsonContent= Json.Serialize(creative); 
+                system.debug('==========jsonContent'+jsonContent);               
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('creative='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkCreativeService.Items(System.JSON.createParser(res.getbody()));
+      }
+    
+     
+     //Update Creative on Adzerk    
+     public AdzerkCreativeService.Items  UpdateCreative  (String accessApikey,Integer id,AdzerkCreativeService.Items creative) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/creative';
+                string jsonContent= Json.Serialize(creative);  
+                system.debug('===========jsonContent1'+jsonContent);              
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('PUT');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('creative='+jsonContent);
+                system.debug('===========jsonContent'+jsonContent);
+                req.setEndpoint(Apiendpoint+'/'+id);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkCreativeService.Items(System.JSON.createParser(res.getbody()));
+     } 
+    
+    /*static testMethod void testParse() {
         String json = '{'+
         '  \"AdvertiserId\":123,'+
         '  \"Body\":\"Test\",'+
@@ -98,5 +178,5 @@ global with sharing class AdzerkCreativeService {
         '}';
         AdzerkCreativeService obj = parse(json);
         System.assert(obj != null);
-    }
+    }*/
 }

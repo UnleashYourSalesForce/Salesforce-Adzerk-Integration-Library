@@ -26,16 +26,20 @@
 
 global with sharing class AdzerkAdvertiserService {
     public class Items {
+    public Integer Id;
     public String Title;
     public Boolean IsDeleted;
     public Boolean IsActive;
-   
+    
+    public Items (){}
     public Items (JSONParser parser) {
     while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
                                 String text = parser.getText();
                                 if (parser.nextToken() != JSONToken.VALUE_NULL) {
-                                        if (text == 'Title'){
+                                        if (text == 'Id'){
+                                            Id=Integer.valueof(parser.getText());
+                                            }else if (text == 'Title'){
                                             Title=parser.getText();
                                             } else if (text == 'IsDeleted') {
                                              IsDeleted=Boolean.Valueof(parser.getText());
@@ -51,6 +55,7 @@ global with sharing class AdzerkAdvertiserService {
     public Integer TotalPages;
     public List<Items> Items;
     
+    public AdzerkAdvertiserService (){}
     public AdzerkAdvertiserService (JSONParser parser) {
     while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -58,7 +63,7 @@ global with sharing class AdzerkAdvertiserService {
                                 if (parser.nextToken() != JSONToken.VALUE_NULL) {
                                         if (text == 'TotalPages'){
                                             TotalPages=Integer.Valueof(parser.getText());
-                                            }else if (text == 'Items ') {
+                                            }else if (text == 'Items') {
                                                 Items = new List<Items >();
                                                while (parser.nextToken() != JSONToken.END_ARRAY) {
                                               Items .add(new Items(parser));
@@ -69,24 +74,86 @@ global with sharing class AdzerkAdvertiserService {
                             }
     }    
     
-     //Get Advertiser Data from Adzerk 
-    public AdzerkAdvertiserService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-    }
-    public AdzerkAdvertiserService (String accessToken, String id) {
-                this(accessToken, id, null);
-    }
-    //Create Advertiser on Adzerk 
-    public AdzerkAdvertiserService.Items  CreateAdvertiser (String accessToken, String id, Map<String, String> params) {
-               return new AdzerkAdvertiserService.Items  (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-    }
-     //Update Advertiser on Adzerk
-    public AdzerkAdvertiserService.Items  UpdateAdvertiser(String accessToken, String id, Map<String, String> params) {
-               return new AdzerkAdvertiserService.Items  (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-    }
-    public static AdzerkAdvertiserService parse(String json) {
-              return new AdzerkAdvertiserService (System.JSON.createParser(json));
-    }
+      
+     //Get Advertiser Data List from Adzerk          
+     public AdzerkAdvertiserService GetAdvertiser (String accessApikey) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/advertiser'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkAdvertiserService(System.JSON.createParser(res.getbody()));
+     }
+     //Get Advertiser based on id from Adzerk          
+     public AdzerkAdvertiserService.Items GetAdvertiser (String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/advertiser';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint+'/'+id);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkAdvertiserService.Items(System.JSON.createParser(res.getbody()));
+     }
+       //Get Search advertiser based on advertiser name from adzerk          
+     public AdzerkAdvertiserService SearchAdvertiser (String accessApikey,string AdvertiserName) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/advertiser/search';
+                Map<string,string> valuemap=new Map<string,string>();
+                valuemap.put('advertiserName',AdvertiserName);
+                string jsonContent= Json.Serialize(valuemap);          
+                system.debug('==========jsonContent'+jsonContent);                
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');  
+                req.setBody(jsonContent);                     
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkAdvertiserService (System.JSON.createParser(res.getbody()));
+     }
+      //Create Advertiser on Adzerk    
+      public AdzerkAdvertiserService.Items CreateAdvertiser (String accessApikey,AdzerkAdvertiserService.Items advertiser) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/advertiser';
+                string jsonContent= Json.Serialize(advertiser);                
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('advertiser='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkAdvertiserService.Items(System.JSON.createParser(res.getbody()));
+      }
+    
+     
+     //Update Advertiser on Adzerk    
+     public AdzerkAdvertiserService.Items  UpdateAdvertiser (String accessApikey,Integer id,AdzerkAdvertiserService.Items advertiser) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/advertiser';
+                string jsonContent= Json.Serialize(advertiser);  
+                system.debug('===========jsonContent1'+jsonContent);              
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('PUT');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('advertiser='+jsonContent);
+                system.debug('===========jsonContent'+jsonContent);
+                req.setEndpoint(Apiendpoint+'/'+id);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkAdvertiserService.Items(System.JSON.createParser(res.getbody()));
+     } 
+    
     
     //As of Apex version 29 or is 28 or 27? Test methods must be in a separate test class
     /**

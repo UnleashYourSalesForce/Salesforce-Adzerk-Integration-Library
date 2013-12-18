@@ -32,7 +32,7 @@ global with sharing class AdzerkPriorityService {
         public Integer ChannelId;
         public Integer Weight;
         public Boolean IsDeleted;
-        
+     public Items (){} 
      public Items (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -58,7 +58,7 @@ global with sharing class AdzerkPriorityService {
 
     public Integer TotalPages;
     public List<Items> Items;
-    
+     public AdzerkPriorityService (){}
     public AdzerkPriorityService (JSONParser parser) {    
     while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -66,7 +66,7 @@ global with sharing class AdzerkPriorityService {
                                 if (parser.nextToken() != JSONToken.VALUE_NULL) {
                                         if (text == 'TotalPages'){
                                             TotalPages=Integer.Valueof(parser.getText());
-                                            } else if (text == 'Items ') {
+                                            } else if (text == 'Items') {
                                                 Items = new List<Items >();
                                                while (parser.nextToken() != JSONToken.END_ARRAY) {
                                               Items .add(new Items(parser));
@@ -78,25 +78,68 @@ global with sharing class AdzerkPriorityService {
                             }
     }
     
-    //Get Priority Data from Adzerk 
-    public AdzerkPriorityService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-    }        
-    public AdzerkPriorityService (String accessToken, String id) {
-                this(accessToken, id, null);
-    }
-    //Create Priority on Adzerk 
-    public AdzerkPriorityService.Items CreatePriority(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkPriorityService.Items (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-    }
-    //Update Priority on Adzerk
-    public AdzerkPriorityService.Items UpdatePriority(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkPriorityService.Items(System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-    }
+   
+     //Get Priority Data List from Adzerk          
+     public AdzerkPriorityService GetPriority (String accessApikey) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/priority'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkPriorityService(System.JSON.createParser(res.getbody()));
+     }
+     //Get Priority based on id from Adzerk          
+     public AdzerkPriorityService.Items GetPriority (String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/priority';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint+'/'+id);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkPriorityService.Items(System.JSON.createParser(res.getbody()));
+     }
+      //Create Priority on Adzerk    
+      public AdzerkPriorityService.Items CreatePriority (String accessApikey,AdzerkPriorityService.Items priority) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/priority';
+                string jsonContent= Json.Serialize(priority);                
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('priority='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkPriorityService.Items(System.JSON.createParser(res.getbody()));
+      }
+      
+     
+     //Update Priority on Adzerk    
+     public AdzerkPriorityService.Items  UpdatePriority (String accessApikey,Integer id,AdzerkPriorityService.Items priority) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/priority';
+                string jsonContent= Json.Serialize(priority);  
+                system.debug('===========jsonContent1'+jsonContent);              
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('PUT');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('priority='+jsonContent);
+                system.debug('===========jsonContent'+jsonContent);
+                req.setEndpoint(Apiendpoint+'/'+id);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkPriorityService.Items(System.JSON.createParser(res.getbody()));
+     } 
     
-    public static AdzerkPriorityService parse(String json) {
-        return new AdzerkPriorityService (System.JSON.createParser(json));
-    }
     
     /*static testMethod void testParse() {
         String json = '{'+

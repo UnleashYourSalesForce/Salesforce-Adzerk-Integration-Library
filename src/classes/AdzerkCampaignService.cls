@@ -36,7 +36,7 @@ global with sharing class AdzerkCampaignService {
         public String Price;
         public Integer Impressions;
         public Boolean NoEndDate;
-        
+         public Flights(){}
          public Flights (JSONParser parser) {
          while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -70,8 +70,9 @@ global with sharing class AdzerkCampaignService {
     }
 
 
-   
+    public class Items{
  /* property keys */
+    public Integer Id;
     public String EndDate;
     public Integer AdvertiserId;
     public String Name;
@@ -82,13 +83,15 @@ global with sharing class AdzerkCampaignService {
     public Boolean IsActive;
 
     /* Constructor */
-    
-    public AdzerkCampaignService(JSONParser parser) {
+    public Items(){}
+    public Items(JSONParser parser) {
     while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
                                 String text = parser.getText();
                                 if (parser.nextToken() != JSONToken.VALUE_NULL) {
-                                        if (text == 'EndDate'){
+                                       if (text == 'Id'){
+                                            Id=Integer.Valueof(parser.getText());
+                                            }else if (text == 'EndDate'){
                                             EndDate=parser.getText();
                                             } else if (text == 'AdvertiserId') {
                                              AdvertiserId=Integer.Valueof(parser.getText());
@@ -112,24 +115,91 @@ global with sharing class AdzerkCampaignService {
                                    }
                             }
     }
-     //Get Campaign Data from Adzerk 
-     public AdzerkCampaignService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-        }  
-     public AdzerkCampaignService (String accessToken, String id) {
-                this(accessToken, id, null);
-        }
-     //Create Campaign on Adzerk    
-     public AdzerkCampaignService CreateCampaign (String accessToken, String id, Map<String, String> params) {
-                return new AdzerkCampaignService (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-        }
+   }
+   public Integer TotalPages;
+   public List<Items> Items;
+   public  AdzerkCampaignService (){}
+   public AdzerkCampaignService (JSONParser parser) {
+    while (parser.nextToken() != JSONToken.END_OBJECT) {
+                        if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
+                                String text = parser.getText();
+                                if (parser.nextToken() != JSONToken.VALUE_NULL) {
+                                        if (text == 'TotalPages'){
+                                            TotalPages=Integer.Valueof(parser.getText());
+                                            } else if (text == 'Items') {
+                                                Items= new List<Items>();
+                                               while (parser.nextToken() != JSONToken.END_ARRAY) {
+                                              Items.add(new Items(parser));
+                                               }
+                                             }
+                                         }
+                                   }
+                            }
+    }
+     
+     //Get Campaign Data List from Adzerk          
+     public AdzerkCampaignService GetCampaign  (String accessApikey) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/campaign'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkCampaignService (System.JSON.createParser(res.getbody()));
+     }
+     //Get Campaign based on id from Adzerk          
+     public AdzerkCampaignService.Items GetCampaign  (String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/campaign';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint+'/'+id);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkCampaignService.Items(System.JSON.createParser(res.getbody()));
+     }
+       
+      //Create Campaign on Adzerk    
+      public AdzerkCampaignService.Items CreateCampaign  (String accessApikey,AdzerkCampaignService.Items campaign) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/campaign';
+                string jsonContent= Json.Serialize(campaign); 
+                system.debug('==========jsonContent'+jsonContent);               
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('campaign='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkCampaignService.Items(System.JSON.createParser(res.getbody()));
+      }
+    
+     
      //Update Campaign on Adzerk    
-     public AdzerkCampaignService UpdateCampaign(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkCampaignService (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-        }
-     public static AdzerkCampaignService parse(String json) {
-               return new AdzerkCampaignService (System.JSON.createParser(json));
-        }
+     public AdzerkCampaignService.Items  UpdateCampaign  (String accessApikey,Integer id,AdzerkCampaignService.Items campaign) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/campaign';
+                string jsonContent= Json.Serialize(campaign);  
+                system.debug('===========jsonContent1'+jsonContent);              
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('PUT');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('campaign='+jsonContent);
+                system.debug('===========jsonContent'+jsonContent);
+                req.setEndpoint(Apiendpoint+'/'+id);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkCampaignService.Items(System.JSON.createParser(res.getbody()));
+     } 
+    
     
     /**
     //Starting apex v29 Test methods must be in test classes

@@ -33,6 +33,7 @@ global with sharing class AdzerkLoginService {
     public String Password;
     public String Name;
     
+    public Items(){}
     public Items(JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -58,8 +59,8 @@ global with sharing class AdzerkLoginService {
     public Integer TotalPages;
     public Integer TotalItems;
     public List<Items> Items;
-    
-    public AdzerkLoginService(JSONParser parser) {
+     public AdzerkLoginService(){}
+     public AdzerkLoginService(JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
                                 String text = parser.getText();
@@ -72,7 +73,7 @@ global with sharing class AdzerkLoginService {
                                               TotalPages= Integer.valueof(parser.getText());
                                              }else if (text == 'TotalItems') {
                                               TotalItems= Integer.valueof(parser.getText());
-                                             }else if (text == 'Items ') {
+                                             }else if (text == 'Items') {
                                                 Items = new List<Items >();
                                                while (parser.nextToken() != JSONToken.END_ARRAY) {
                                               Items .add(new Items(parser));
@@ -82,29 +83,73 @@ global with sharing class AdzerkLoginService {
                                  }
                        }
               }
+     
+     //Get Login Data List from Adzerk          
+     public AdzerkLoginService GetLogin  (String accessApikey) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/login'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkLoginService(System.JSON.createParser(res.getbody()));
+     }
+     //Get Login based on id from Adzerk          
+     public AdzerkLoginService.Items GetLogin  (String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/login';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint+'/'+id);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new  AdzerkLoginService.Items(System.JSON.createParser(res.getbody()));
+     }
+       
+      //Create Login on Adzerk    
+      public AdzerkLoginService.Items CreateLogin  (String accessApikey,AdzerkLoginService.Items login) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/login';
+                string jsonContent= Json.Serialize(login);                
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('login='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkLoginService.Items(System.JSON.createParser(res.getbody()));
+      }
     
-    //Get Login Data from Adzerk
-    public AdzerkLoginService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-    }        
-    public AdzerkLoginService(String accessToken, String id) {
-                this(accessToken, id, null);
-    }  
-    //Create Login on Adzerk    
-    public AdzerkLoginService.Items CreateLogin (String accessToken, String id, Map<String, String> params) {
-                return new AdzerkLoginService.Items(System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-    }
-     //Update Login on Adzerk    
-     public AdzerkLoginService.Items UpdateLogin(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkLoginService.Items (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-    }  
-    public static AdzerkLoginService parse(String json) {
-                return new AdzerkLoginService (System.JSON.createParser(json));
-    }
+     
+     //Update Login  on Adzerk    
+     public AdzerkLoginService.Items  UpdateLogin  (String accessApikey,Integer id,AdzerkLoginService.Items login) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/login';
+                string jsonContent= Json.Serialize(login);  
+                system.debug('===========jsonContent1'+jsonContent);              
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('PUT');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('login='+jsonContent);
+                system.debug('===========jsonContent'+jsonContent);
+                req.setEndpoint(Apiendpoint+'/'+id);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkLoginService.Items(System.JSON.createParser(res.getbody()));
+     } 
     
     
     
-    static testMethod void testParse() {
+    
+   /* static testMethod void testParse() {
         String json = '{'+
         '    \"Id\":1234,'+
         '    \"Email\":\"test@adzerk.com\",'+
@@ -113,5 +158,5 @@ global with sharing class AdzerkLoginService {
         '}';
         AdzerkLoginService obj = parse(json);
         System.assert(obj != null);
-    }
+    }*/
 }
