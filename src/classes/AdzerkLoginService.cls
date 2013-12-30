@@ -26,9 +26,8 @@
 
 global with sharing class AdzerkLoginService {
 
- public class Items {
-      
-    public Integer Id;
+ global class Items {      
+    public Integer Id=0;
     public String Email;
     public String Password;
     public String Name;
@@ -85,7 +84,7 @@ global with sharing class AdzerkLoginService {
               }
      
      //Get Login Data List from Adzerk          
-     public AdzerkLoginService GetLogin  (String accessApikey) {  
+      webService static AdzerkLoginService GetLoginList(String accessApikey) {  
                 String Apiendpoint= 'http://api.adzerk.net/v1/login'; 
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -98,7 +97,7 @@ global with sharing class AdzerkLoginService {
                 return new AdzerkLoginService(System.JSON.createParser(res.getbody()));
      }
      //Get Login based on id from Adzerk          
-     public AdzerkLoginService.Items GetLogin  (String accessApikey,Integer id) {   
+      webService static AdzerkLoginService.Items GetLogin(String accessApikey,Integer id) {   
                 String Apiendpoint= 'http://api.adzerk.net/v1/login';
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -112,7 +111,7 @@ global with sharing class AdzerkLoginService {
      }
        
       //Create Login on Adzerk    
-      public AdzerkLoginService.Items CreateLogin  (String accessApikey,AdzerkLoginService.Items login) {
+       webService static AdzerkLoginService.Items CreateLogin(String accessApikey,AdzerkLoginService.Items login) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/login';
                 string jsonContent= Json.Serialize(login);                
                 Http h = new Http();
@@ -125,38 +124,21 @@ global with sharing class AdzerkLoginService {
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkLoginService.Items(System.JSON.createParser(res.getbody()));
-      }
-    
-     
+      } 
      //Update Login  on Adzerk    
-     public AdzerkLoginService.Items  UpdateLogin  (String accessApikey,Integer id,AdzerkLoginService.Items login) {
+      webService static AdzerkLoginService.Items  UpdateLogin(String accessApikey,Integer id,AdzerkLoginService.Items login) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/login';
-                string jsonContent= Json.Serialize(login);  
-                system.debug('===========jsonContent1'+jsonContent);              
+                string jsonContent= Json.Serialize(login);                    
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('PUT');
                 req.setHeader('X-Adzerk-ApiKey',accessApikey);
                 req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.setBody('login='+jsonContent);
-                system.debug('===========jsonContent'+jsonContent);
                 req.setEndpoint(Apiendpoint+'/'+id);                        
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkLoginService.Items(System.JSON.createParser(res.getbody()));
      } 
     
-    
-    
-    
-   /* static testMethod void testParse() {
-        String json = '{'+
-        '    \"Id\":1234,'+
-        '    \"Email\":\"test@adzerk.com\",'+
-        '    \"Password\":\"somehashedpassword\",'+
-        '    \"Name\":\"John Doe\"'+
-        '}';
-        AdzerkLoginService obj = parse(json);
-        System.assert(obj != null);
-    }*/
 }

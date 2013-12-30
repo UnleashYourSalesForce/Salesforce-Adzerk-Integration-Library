@@ -26,12 +26,12 @@
 
 global with sharing class AdzerkAdTypeService {
 
-    public class Items {
-        public Integer Id;
-        public Integer Height;
-        public Integer Width;
-        public String Name;
-        
+    global class Items {
+      public Integer Id=0;
+      public Integer Height;
+      public Integer Width;
+      public String Name='';
+    public Items (){} 
     public Items (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -58,7 +58,7 @@ global with sharing class AdzerkAdTypeService {
     public Integer totalPages;
     public Integer totalItems;
     public List<Items> items;
-
+    public AdzerkAdTypeService(){}
     public AdzerkAdTypeService(JSONParser parser) {    
     while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -72,10 +72,10 @@ global with sharing class AdzerkAdTypeService {
                                                 totalPages=Integer.Valueof(parser.getText());
                                              }else if (text == 'totalItems') {
                                                 totalItems=Integer.Valueof(parser.getText());
-                                             }else if (text == 'Items ') {
+                                             }else if (text == 'Items') {
                                                 Items = new List<Items >();
                                                while (parser.nextToken() != JSONToken.END_ARRAY) {
-                                              Items .add(new Items(parser));
+                                              Items.add(new Items(parser));
                                                }
                                              }
                                              
@@ -83,77 +83,91 @@ global with sharing class AdzerkAdTypeService {
                                    }
                             }
     }
-    //Get AdType Data from Adzerk
-    public AdzerkAdTypeService (String accessToken, String id, Map<String, String> params) {
-                this(System.JSON.createParser(AdzerkUtil.get(accessToken, id, params)));
-    }        
-    public AdzerkAdTypeService (String accessToken, String id) {
-                this(accessToken, id, null);
-    }
-    //Create AdType on Adzerk    
-    public AdzerkAdTypeService.Items  CreateAdType (String accessToken, String id, Map<String, String> params) {
-                return new AdzerkAdTypeService.Items  (System.JSON.createParser(AdzerkUtil.CreateRecord(accessToken, id, params)));
-    }
-    //Update AdType on Adzerk
-    public AdzerkAdTypeService.Items  UpdateAdType(String accessToken, String id, Map<String, String> params) {
-                return new AdzerkAdTypeService.Items  (System.JSON.createParser(AdzerkUtil.UpdateRecord(accessToken, id, params)));
-    }
-    public static AdzerkAdTypeService parse(String json) {
-              return new AdzerkAdTypeService (System.JSON.createParser(json));
-    }
+    //Get Ad Type (Network) Data from Adzerk
+     webService static AdzerkAdTypeService GetAdType(String accessApikey) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/adtypes'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);                       
+                return new AdzerkAdTypeService(System.JSON.createParser(res.getbody()));
+     }   
+     //Delete Ad Type (Network) based on id from Adzerk          
+      webService static string DeleteAdType(String accessApikey,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/adtypes/'+id+'/delete';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                string response = res.getBody();
+                return response; 
+     }
+    //Create Ad Type (Network)on Adzerk    
+      webService static AdzerkAdTypeService.Items  CreateAdType(String accessApikey,AdzerkAdTypeService.Items adtype) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/adtypes';
+                string jsonContent= Json.Serialize(adtype); 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('adtype='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkAdTypeService.Items(System.JSON.createParser(res.getbody()));
+      }
     
-    static testMethod void testParse() {
-        String json = '{'+
-        '  \"page\": 1,'+
-        '  \"pageSize\": 10,'+
-        '  \"totalPages\": 1,'+
-        '  \"totalItems\": 7,'+
-        '  \"items\": ['+
-        '    {'+
-        '      \"Id\": 1,'+
-        '      \"Height\": 90,'+
-        '      \"Width\": 120,'+
-        '      \"Name\": \"Button 1 and Text\"'+
-        '    },'+
-        '    {'+
-        '      \"Id\": 2,'+
-        '      \"Height\": 90,'+
-        '      \"Width\": 120,'+
-        '      \"Name\": \"Button 1\"'+
-        '    },'+
-        '    {'+
-        '      \"Id\": 3,'+
-        '      \"Height\": 60,'+
-        '      \"Width\": 468,'+
-        '      \"Name\": \"Full Banner\"'+
-        '    },'+
-        '    {'+
-        '      \"Id\": 4,'+
-        '      \"Height\": 90,'+
-        '      \"Width\": 728,'+
-        '      \"Name\": \"Leaderboard\"'+
-        '    },'+
-        '    {'+
-        '      \"Id\": 5,'+
-        '      \"Height\": 250,'+
-        '      \"Width\": 300,'+
-        '      \"Name\": \"Medium Rectangle\"'+
-        '    },'+
-        '    {'+
-        '      \"Id\": 6,'+
-        '      \"Height\": 600,'+
-        '      \"Width\": 160,'+
-        '      \"Name\": \"Wide Skyscraper\"'+
-        '    },'+
-        '    {'+
-        '      \"Id\": 7,'+
-        '      \"Height\": 600,'+
-        '      \"Width\": 120,'+
-        '      \"Name\": \"Skyscraper\"'+
-        '    }'+
-        '  ]'+
-        '}';
-        AdzerkAdTypeService obj = parse(json);
-        System.assert(obj != null);
-    }
+    //Get Ad Type (Channel) Data from Adzerk, based on ChannelId 
+     webService static AdzerkAdTypeService GetAdTypeByChannelId(String accessApikey,Integer ChannelId) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/channel/'+ChannelId+'/adtypes'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);   
+                return new AdzerkAdTypeService(System.JSON.createParser(res.getbody()));
+     } 
+     
+     //Delete Ad Type (Channel) based on id from Adzerk based on Id          
+      webService static string DeleteAdTypeByChannelId(String accessApikey,Integer ChannelId,Integer id) {   
+                String Apiendpoint= 'http://api.adzerk.net/v1/channel/'+ChannelId+'/adtypes/'+id+'/delete';
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                string response = res.getBody();
+                return response; 
+     }
+     //Create Ad Type (Channel)on Adzerk, based on ChannelId   
+      webService static AdzerkAdTypeService.Items  CreateAdTypeByChannelId(String accessApikey,Integer ChannelId,AdzerkAdTypeService.Items adtype) {
+                String Apiendpoint= 'http://api.adzerk.net/v1/channel/'+ChannelId+'/adtype';
+                string jsonContent= Json.Serialize(adtype); 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('POST');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+                req.setBody('adtype='+jsonContent);
+                req.setEndpoint(Apiendpoint);                        
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);
+                return new AdzerkAdTypeService.Items(System.JSON.createParser(res.getbody()));
+      }
+   
 }

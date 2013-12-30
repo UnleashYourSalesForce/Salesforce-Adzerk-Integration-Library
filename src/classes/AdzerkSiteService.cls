@@ -26,14 +26,13 @@
 
 global with sharing class AdzerkSiteService  {
   
-   public class Items {
-    public Integer Id;
+   global class Items {
+    public Integer Id=0;
     public String Title;
     public String Url;
-    public Integer PublisherAccountId;
+    public Integer PublisherAccountId=0;
 
-    public Items () {
-     }
+    public Items () {}
     public Items (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -51,7 +50,7 @@ global with sharing class AdzerkSiteService  {
                                          }
                                    }
                             }
-    }
+          }
     }
     
     public Integer Page;
@@ -60,9 +59,7 @@ global with sharing class AdzerkSiteService  {
     public Integer TotalItems;
     public List<Items> Items;
     
-    public AdzerkSiteService()
-    {
-    }
+    public AdzerkSiteService(){}
     public AdzerkSiteService (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -88,7 +85,7 @@ global with sharing class AdzerkSiteService  {
               }
       
      //Get site Data List from Adzerk          
-     public AdzerkSiteService GetSite(String accessApikey) { 
+     webService static AdzerkSiteService GetSiteList(String accessApikey) { 
                 String Apiendpoint= 'http://api.adzerk.net/v1/site';  
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -101,7 +98,7 @@ global with sharing class AdzerkSiteService  {
                 return new AdzerkSiteService(System.JSON.createParser(res.getbody()));
      }
      //Get site based on id from Adzerk          
-     public AdzerkSiteService.Items GetSite(String accessApikey,Integer id) {  
+     webService static AdzerkSiteService.Items GetSite(String accessApikey,Integer id) {  
                 String Apiendpoint= 'http://api.adzerk.net/v1/site'; 
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -114,7 +111,7 @@ global with sharing class AdzerkSiteService  {
                 return new  AdzerkSiteService.Items(System.JSON.createParser(res.getbody()));
      }
       //Create site on Adzerk    
-      public AdzerkSiteService.Items CreateSite (String accessApikey,AdzerkSiteService.Items site) {
+      webService static AdzerkSiteService.Items CreateSite(String accessApikey,AdzerkSiteService.Items site) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/site';
                 string jsonContent= Json.Serialize(site);                
                 Http h = new Http();
@@ -128,35 +125,20 @@ global with sharing class AdzerkSiteService  {
                 res = h.send(req);
                 return new AdzerkSiteService.Items(System.JSON.createParser(res.getbody()));
       }
-      
-     
      //Update site on Adzerk    
-     public AdzerkSiteService.Items  UpdateSite(String accessApikey,Integer id,AdzerkSiteService.Items site) {
+     webService static AdzerkSiteService.Items  UpdateSite(String accessApikey,Integer id,AdzerkSiteService.Items site) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/site';
                 string jsonContent= Json.Serialize(site);  
-                system.debug('===========jsonContent1'+jsonContent);              
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('PUT');
                 req.setHeader('X-Adzerk-ApiKey',accessApikey);
                 req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.setBody('site='+jsonContent);
-                system.debug('===========jsonContent'+jsonContent);
                 req.setEndpoint(Apiendpoint+'/'+id);                        
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkSiteService.Items(System.JSON.createParser(res.getbody()));
      } 
-    
   
-   /* static testMethod void testParse() {
-        String json = '{'+
-        '  \"Id\":1234,'+
-        '  \"Title\":\"Test Site\",'+
-        '  \"Url\":\"http://www.adzerk.com\",'+
-        '  \"PublisherAccountId\":123'+
-        '}';
-        AdzerkSiteService obj = parse(json);
-        System.assert(obj != null);
-    }*/
 }

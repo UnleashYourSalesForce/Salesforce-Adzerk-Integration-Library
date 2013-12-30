@@ -26,8 +26,8 @@
 
 global with sharing class AdzerkZoneService  {
     
-    public class Items {
-    public Integer Id;
+    global class Items {
+    public Integer Id=0;
     public String Name;
     public Integer SiteId;
 
@@ -47,7 +47,7 @@ global with sharing class AdzerkZoneService  {
                                          }
                                    }
                             }
-    }
+                }
   }
    
    public Integer PageNumber;
@@ -83,7 +83,7 @@ global with sharing class AdzerkZoneService  {
     
       
      //Get Zone Data List from Adzerk          
-     public AdzerkZoneService  GetZone(String accessApikey) {  
+     webService static AdzerkZoneService  GetZoneList(String accessApikey) {  
                 String Apiendpoint= 'http://api.adzerk.net/v1/zone'; 
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -92,11 +92,12 @@ global with sharing class AdzerkZoneService  {
                 req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
                 req.setEndpoint(Apiendpoint);                         
                 HttpResponse res=new HttpResponse();
-                res = h.send(req);              
+                res = h.send(req);                              
                 return new AdzerkZoneService(System.JSON.createParser(res.getbody()));
+               
      }
      //Get Zone based on id from Adzerk          
-     public AdzerkZoneService.Items GetZone(String accessApikey,Integer id) {   
+     webService static AdzerkZoneService.Items GetZone(String accessApikey,Integer id) {   
                 String Apiendpoint= 'http://api.adzerk.net/v1/zone';
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -109,7 +110,7 @@ global with sharing class AdzerkZoneService  {
                 return new  AdzerkZoneService.Items(System.JSON.createParser(res.getbody()));
      }
       //Create Zone on Adzerk    
-      public AdzerkZoneService.Items CreateZone (String accessApikey,AdzerkZoneService.Items zone) {
+      webService static AdzerkZoneService.Items CreateZone (String accessApikey,AdzerkZoneService.Items zone) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/zone';
                 string jsonContent= Json.Serialize(zone);                
                 Http h = new Http();
@@ -123,38 +124,21 @@ global with sharing class AdzerkZoneService  {
                 res = h.send(req);
                 return new AdzerkZoneService.Items(System.JSON.createParser(res.getbody()));
       }
-      
-     
      //Update Zone on Adzerk    
-
-     public AdzerkZoneService.Items  UpdateZone(String accessApikey,Integer id,AdzerkZoneService.Items zone) {
+     webService static AdzerkZoneService.Items  UpdateZone(String accessApikey,Integer id,AdzerkZoneService.Items zone) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/zone';
-                string jsonContent= Json.Serialize(zone);  
-                system.debug('===========jsonContent1'+jsonContent);              
+                string jsonContent= Json.Serialize(zone);                            
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('PUT');
                 req.setHeader('X-Adzerk-ApiKey',accessApikey);
                 req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.setBody('zone='+jsonContent);
-                system.debug('===========jsonContent'+jsonContent);
                 req.setEndpoint(Apiendpoint+'/'+id);                        
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkZoneService.Items(System.JSON.createParser(res.getbody()));
-
      } 
     
-    /*static testMethod void testParse() {
-        String json = '{'+
-        '  \"Id\":1234,'+
-        '  \"Name\":\"Test zone\",'+
-        '  \"SiteId\":123'+
-        '}';
-        AdzerkZoneService obj = parse(json);
-        System.assert(obj != null);
-
-    }*/
-}
-
    
+}

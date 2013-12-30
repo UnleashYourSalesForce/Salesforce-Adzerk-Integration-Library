@@ -25,11 +25,11 @@
 **/ 
 
 global with sharing class AdzerkAdvertiserService {
-    public class Items {
-    public Integer Id;
+    global class Items {
+    public Integer Id=0;
     public String Title;
-    public Boolean IsDeleted;
-    public Boolean IsActive;
+    public Boolean IsDeleted=false;
+    public Boolean IsActive=true;
     
     public Items (){}
     public Items (JSONParser parser) {
@@ -49,7 +49,7 @@ global with sharing class AdzerkAdvertiserService {
                                          }
                                    }
                             }
-    }
+               }
     }
     
     public Integer TotalPages;
@@ -76,7 +76,7 @@ global with sharing class AdzerkAdvertiserService {
     
       
      //Get Advertiser Data List from Adzerk          
-     public AdzerkAdvertiserService GetAdvertiser (String accessApikey) {  
+      webService static AdzerkAdvertiserService GetAdvertiserList(String accessApikey) {  
                 String Apiendpoint= 'http://api.adzerk.net/v1/advertiser'; 
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -89,7 +89,7 @@ global with sharing class AdzerkAdvertiserService {
                 return new AdzerkAdvertiserService(System.JSON.createParser(res.getbody()));
      }
      //Get Advertiser based on id from Adzerk          
-     public AdzerkAdvertiserService.Items GetAdvertiser (String accessApikey,Integer id) {   
+      webService static AdzerkAdvertiserService.Items GetAdvertiser(String accessApikey,Integer id) {   
                 String Apiendpoint= 'http://api.adzerk.net/v1/advertiser';
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -102,12 +102,11 @@ global with sharing class AdzerkAdvertiserService {
                 return new  AdzerkAdvertiserService.Items(System.JSON.createParser(res.getbody()));
      }
        //Get Search advertiser based on advertiser name from adzerk          
-     public AdzerkAdvertiserService SearchAdvertiser (String accessApikey,string AdvertiserName) {   
+      webService static AdzerkAdvertiserService SearchAdvertiser(String accessApikey,string AdvertiserName) {   
                 String Apiendpoint= 'http://api.adzerk.net/v1/advertiser/search';
                 Map<string,string> valuemap=new Map<string,string>();
                 valuemap.put('advertiserName',AdvertiserName);
-                string jsonContent= Json.Serialize(valuemap);          
-                system.debug('==========jsonContent'+jsonContent);                
+                string jsonContent= Json.Serialize(valuemap);  
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('GET');
@@ -120,7 +119,7 @@ global with sharing class AdzerkAdvertiserService {
                 return new  AdzerkAdvertiserService (System.JSON.createParser(res.getbody()));
      }
       //Create Advertiser on Adzerk    
-      public AdzerkAdvertiserService.Items CreateAdvertiser (String accessApikey,AdzerkAdvertiserService.Items advertiser) {
+       webService static AdzerkAdvertiserService.Items CreateAdvertiser(String accessApikey,AdzerkAdvertiserService.Items advertiser) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/advertiser';
                 string jsonContent= Json.Serialize(advertiser);                
                 Http h = new Http();
@@ -134,37 +133,20 @@ global with sharing class AdzerkAdvertiserService {
                 res = h.send(req);
                 return new AdzerkAdvertiserService.Items(System.JSON.createParser(res.getbody()));
       }
-    
-     
      //Update Advertiser on Adzerk    
-     public AdzerkAdvertiserService.Items  UpdateAdvertiser (String accessApikey,Integer id,AdzerkAdvertiserService.Items advertiser) {
+      webService static AdzerkAdvertiserService.Items  UpdateAdvertiser(String accessApikey,Integer id,AdzerkAdvertiserService.Items advertiser) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/advertiser';
-                string jsonContent= Json.Serialize(advertiser);  
-                system.debug('===========jsonContent1'+jsonContent);              
+                string jsonContent= Json.Serialize(advertiser); 
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('PUT');
                 req.setHeader('X-Adzerk-ApiKey',accessApikey);
                 req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
-                req.setBody('advertiser='+jsonContent);
-                system.debug('===========jsonContent'+jsonContent);
+                req.setBody('advertiser='+jsonContent);               
                 req.setEndpoint(Apiendpoint+'/'+id);                        
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkAdvertiserService.Items(System.JSON.createParser(res.getbody()));
      } 
-    
-    
-    //As of Apex version 29 or is 28 or 27? Test methods must be in a separate test class
-    /**
-    static testMethod void testParse() {
-        String json = '{'+
-        '  \"Title\":\"Test advertiser\",'+
-        '  \"IsDeleted\":false,'+
-        '  \"IsActive\":true'+
-        '}';
-        AdzerkAdvertiserService obj = parse(json);
-        System.assert(obj != null);
-    }
-    */
+  
 }

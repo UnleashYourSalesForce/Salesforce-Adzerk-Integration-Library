@@ -26,12 +26,12 @@
 
 global with sharing class AdzerkFlightService {
 
-    public class GeoTargeting {
+    global class GeoTargeting {
         public String CountryCode;
         public String Region;
         public Integer MetroCode;
-        public Boolean IsExclude;
-         public GeoTargeting(){}
+        public Boolean IsExclude=false;
+        public GeoTargeting(){}
     public GeoTargeting(JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
                         if (parser.getCurrentToken() == JSONToken.FIELD_NAME) {
@@ -52,10 +52,10 @@ global with sharing class AdzerkFlightService {
                   }
     }
 
-    public class SiteZoneTargeting {
+    global class SiteZoneTargeting {
         public Integer SiteId;
         public Integer ZoneId;
-        public Boolean IsExclude;
+        public Boolean IsExclude=false;
         public SiteZoneTargeting (){}
     public SiteZoneTargeting (JSONParser parser) {
      while (parser.nextToken() != JSONToken.END_OBJECT) {
@@ -75,23 +75,23 @@ global with sharing class AdzerkFlightService {
                   }
         
     }
-    public class Items {
+    global class Items {
     public String StartDate;
     public String EndDate;
-    public Boolean NoEndDate;
+    public Boolean NoEndDate=false;
     public Double Price;
     public Integer Impressions;
-    public Boolean IsUnlimited;
-    public Boolean IsNoDuplicates;
-    public Boolean IsFullSpeed;
+    public Boolean IsUnlimited=false;
+    public Boolean IsNoDuplicates=false;
+    public Boolean IsFullSpeed=false;
     public String Keywords;
     public String UserAgentKeywords;
     public String Name;
-    public Boolean IsFreqCap;
+    public Boolean IsFreqCap=false;
     public Integer CampaignId;
     public Integer PriorityId;
-    public Boolean IsDeleted;
-    public Boolean IsActive;
+    public Boolean IsDeleted=false;
+    public Boolean IsActive=true;
     public List<GeoTargeting> GeoTargeting;
     public List<SiteZoneTargeting> SiteZoneTargeting;
     public Integer ECPMOptimizePeriod;
@@ -101,7 +101,7 @@ global with sharing class AdzerkFlightService {
     public Double DefaultECPM;
     public Integer ECPMBurnInImpressions;
     public Boolean IsECPMOptimized;
-    public Integer Id;
+    public Integer Id=0;
 
      public Items (){}
     public Items (JSONParser parser) {
@@ -171,7 +171,7 @@ global with sharing class AdzerkFlightService {
                                          }
                                  }
                        }
-    }
+            }
    } 
    
     public Integer TotalPages;
@@ -195,7 +195,7 @@ global with sharing class AdzerkFlightService {
                             }
     }
      //Get Flight Data List from Adzerk          
-     public AdzerkFlightService GetFlight (String accessApikey) {  
+      webService static AdzerkFlightService GetFlightList(String accessApikey) {  
                 String Apiendpoint= 'http://api.adzerk.net/v1/flight'; 
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -207,8 +207,21 @@ global with sharing class AdzerkFlightService {
                 res = h.send(req);              
                 return new AdzerkFlightService(System.JSON.createParser(res.getbody()));
      }
+     //Get Flight Data List from Adzerk          
+      webService static AdzerkFlightService GetFlightByCampaignId(String accessApikey, Integer CampaignId) {  
+                String Apiendpoint= 'http://api.adzerk.net/v1/campaign/'+CampaignId+'/flight'; 
+                Http h = new Http();
+                HttpRequest req = new HttpRequest();
+                req.setMethod('GET');
+                req.setHeader('X-Adzerk-ApiKey',accessApikey);
+                req.setHeader('Content-Type', 'application/x-www-form-urlencoded');                       
+                req.setEndpoint(Apiendpoint);                         
+                HttpResponse res=new HttpResponse();
+                res = h.send(req);              
+                return new AdzerkFlightService(System.JSON.createParser(res.getbody()));
+     }
      //Get Flight based on id from Adzerk          
-     public AdzerkFlightService.Items GetFlight (String accessApikey,Integer id) {   
+      webService static AdzerkFlightService.Items GetFlight(String accessApikey,Integer id) {   
                 String Apiendpoint= 'http://api.adzerk.net/v1/flight';
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
@@ -219,13 +232,11 @@ global with sharing class AdzerkFlightService {
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);              
                 return new  AdzerkFlightService.Items(System.JSON.createParser(res.getbody()));
-     }
-       
+     } 
       //Create Flight on Adzerk    
-      public AdzerkFlightService.Items CreateFlight  (String accessApikey,AdzerkFlightService.Items flight) {
+       webService static AdzerkFlightService.Items CreateFlight(String accessApikey,AdzerkFlightService.Items flight) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/flight';
-                string jsonContent= Json.Serialize(flight); 
-                system.debug('==========jsonContent'+jsonContent);               
+                string jsonContent= Json.Serialize(flight);
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('POST');
@@ -237,65 +248,20 @@ global with sharing class AdzerkFlightService {
                 res = h.send(req);
                 return new AdzerkFlightService.Items(System.JSON.createParser(res.getbody()));
       }
-    
-     
      //Update Flight on Adzerk    
-     public AdzerkFlightService.Items  UpdateFlight  (String accessApikey,Integer id,AdzerkFlightService.Items flight) {
+      webService static AdzerkFlightService.Items  UpdateFlight(String accessApikey,Integer id,AdzerkFlightService.Items flight) {
                 String Apiendpoint= 'http://api.adzerk.net/v1/flight';
                 string jsonContent= Json.Serialize(flight);  
-                system.debug('===========jsonContent1'+jsonContent);              
                 Http h = new Http();
                 HttpRequest req = new HttpRequest();
                 req.setMethod('PUT');
                 req.setHeader('X-Adzerk-ApiKey',accessApikey);
                 req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
                 req.setBody('flight='+jsonContent);
-                system.debug('===========jsonContent'+jsonContent);
                 req.setEndpoint(Apiendpoint+'/'+id);                        
                 HttpResponse res=new HttpResponse();
                 res = h.send(req);
                 return new AdzerkFlightService.Items(System.JSON.createParser(res.getbody()));
      } 
-    
-
-    
-   /* static testMethod void testParse() {
-        String json = '{'+
-        '  \"StartDate\":\"1/1/2011\",'+
-        '  \"EndDate\":\"12/31/2011\",'+
-        '  \"NoEndDate\":false,'+
-        '  \"Price\":10.00,'+
-        '  \"Impressions\":10000,'+
-        '  \"IsUnlimited\":false,'+
-        '  \"IsNoDuplicates\":false,'+
-        '  \"IsFullSpeed\":false,'+
-        '  \"Keywords\":\"test, test2\",'+
-        '  \"UserAgentKeywords\":\"\",'+
-        '  \"Name\":\"Test\",'+
-        '  \"IsFreqCap\":false,'+
-        '  \"CampaignId\":1234,'+
-        '  \"PriorityId\":1234,'+
-        '  \"IsDeleted\":false,'+
-        '  \"IsActive\":true,'+
-        '  \"GeoTargeting\":[{'+
-        '    \"CountryCode\":\"US\",'+
-        '    \"Region\":\"NC\",'+
-        '    \"MetroCode\":560,'+
-        '    \"IsExclude\":false'+
-        '  }],'+
-        '  \"SiteZoneTargeting\":[{'+
-        '    \"SiteId\":123,'+
-        '    \"ZoneId\":321,'+
-        '    \"IsExclude\":false'+
-        '  }],'+
-        '  \"ECPMOptimizePeriod\":30,'+
-        '  \"ECPMMultiplier\":1.25,'+
-        '  \"FloorECPM\":0.15,'+
-        '  \"CeilingECPM\":0.35,'+
-        '  \"DefaultECPM\":0.28,'+
-        '  \"ECPMBurnInImpressions\":1000'+
-        '}';
-        AdzerkFlightService obj = parse(json);
-        System.assert(obj != null);
-    }*/
+   
 }

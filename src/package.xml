@@ -11,7 +11,6 @@
         <members>AdzerkLoginService</members>
         <members>AdzerkPriorityService</members>
         <members>AdzerkSiteService</members>
-        <members>AdzerkUtil</members>
         <members>AdzerkZoneService</members>
         <name>ApexClass</name>
     </types>
